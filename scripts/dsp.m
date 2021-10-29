@@ -52,10 +52,20 @@ stem(fr(N/2-lim:N/2+lim), abs(Xk(N/2-lim:N/2+lim)));
 xlabel('Frequency [Hz]', 'Interpreter', 'latex');
 ylabel('DFT Magnitude, $|X[k]|$', 'Interpreter', 'latex');
 
+fig_2 = figure('Name', 'Time Domain Signal', 'NumberTitle', 'off');
+figure(fig_2);
+stem(1:200, xn(1:200));
+xlabel('$n$', 'Interpreter', 'latex');
+ylabel('Signal, $x[n]$', 'Interpreter', 'latex');
+ylim([-1.1 1.1])
+
 %% problem 2: manipulation of signals in the frequency domain
+
+%x1 = ;
 
 
 %% autoexport figures to (pdf) files
 %  note: uncomment to save again
 
-% savefig(fig_1, '../figs/problem1')
+% savefig(fig_1, '../figs/problem1_fft');
+% savefig(fig_2, '../figs/problem1_sig');
