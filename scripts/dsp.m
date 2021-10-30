@@ -59,13 +59,46 @@ xlabel('$n$', 'Interpreter', 'latex');
 ylabel('Signal, $x[n]$', 'Interpreter', 'latex');
 ylim([-1.1 1.1])
 
-%% problem 2: manipulation of signals in the frequency domain
+%% problem 2: effects of windowing signal in time domain on the frequency spectra
 
-%x1 = ;
+Fs  = 44100; % sampling frequency, in hertz
+f   = 1000;  % frequency of signal, in hertz
+dur = 10;    % duration of the signal, in seconds
+N   = floor(dur * Fs);  % number of sampled points of the signal (for dft)
+df  = Fs/N;             % frequency increment in nyquist range
+fr  = -Fs/2:df:Fs/2-df; % frequency range (nyquist range)
 
+t   = linspace(0, dur, dur*Fs + 1); % time range
+x1  = sin(2*pi*f*t);                % original signal (high sampling duration)
+
+s = 1; t = 9;               % start and end of the zeroing-window 
+x2 = x1; x2(s*Fs:t*Fs) = 0; % cut signal (low sampling duration)
+
+% get ffts
+X1 = fftshift(fft(x1));
+X2 = fftshift(fft(x2));
+
+fig_3 = figure('Name', 'Full Duration Signal Spectra', 'NumberTitle', 'off');
+fig_4 = figure('Name', 'Windowed Signal Spectra', 'NumberTitle', 'off');
+fl = 960;
+fh = 1040;
+
+figure(fig_3);
+plot(fr(N/2+fl*N/Fs:N/2+fh*N/Fs), abs(X1(N/2+fl*N/Fs:N/2+fh*N/Fs)));
+xlim([fl fh]);
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude, $|X_1[k]|$', 'Interpreter', 'latex');
+
+figure(fig_4);
+plot(fr(N/2+fl*N/Fs:N/2+fh*N/Fs), abs(X2(N/2+fl*N/Fs:N/2+fh*N/Fs)));
+xlim([fl fh]);
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude, $|X_2[k]|$', 'Interpreter', 'latex');
 
 %% autoexport figures to (pdf) files
 %  note: uncomment to save again
 
 % savefig(fig_1, '../figs/problem1_fft');
 % savefig(fig_2, '../figs/problem1_sig');
+% savefig(fig_3, '../figs/problem2_fft_high_dur');
+% savefig(fig_4, '../figs/problem2_fft_low_dur');
