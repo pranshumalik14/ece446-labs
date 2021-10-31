@@ -95,6 +95,47 @@ xlim([fl fh]);
 xlabel('Frequency [Hz]', 'Interpreter', 'latex');
 ylabel('DFT Magnitude, $|X_2[k]|$', 'Interpreter', 'latex');
 
+%% problem 3: telephone dial tones
+
+Fs  = 10000; % sampling frequency, in hertz
+dur = 1;     % duration of the signal, in seconds
+t   = linspace(0, dur, dur*Fs + 1); % time range
+
+fl1 = 697;   % first lower band frequency, in hertz
+fl2 = 770;   % second lower band frequency, in hertz
+fu1 = 1209;  % first upper band frequency, in hertz
+fu2 = 1336;  % second upper band frequency, in hertz
+
+dialtone_1 = 0.5*(cos(2*pi*fl1*t) + cos(2*pi*fu1*t));
+dialtone_2 = 0.5*(cos(2*pi*fl1*t) + cos(2*pi*fu2*t));
+dialtone_4 = 0.5*(cos(2*pi*fl2*t) + cos(2*pi*fu1*t));
+
+%% problem 4: dialtone decode algorithm
+
+% simple dtmf decode algorithm for a subset of tones (can be extended)
+input_dtmf_tone = '';
+[signal, Fs]    = audioread(input_dtmf_tone);
+
+N   = length(signal);   % number of points in input signal and its fft
+df  = Fs/N;             % frequency increment in nyquist range
+fr  = -Fs/2:df:Fs/2-df; % frequency range (nyquist range)
+
+fr_eps      = 10;         % frequency window around pure tones
+dtmf_matrix = [1 2; 4 5]; % (partial) dtmf decode matrix; indexed by lower and upper band freqs
+signal_fft  = fftshift(fft(signal)); % fft of the input signal
+
+% get magnitude of each tone's contribution to the signal spectrum
+m_fl1 = sum(2*abs(signal_fft(abs(fr - fl1) < fr_eps)));
+m_fl2 = sum(2*abs(signal_fft(abs(fr - fl2) < fr_eps)));
+m_fu1 = sum(2*abs(signal_fft(abs(fr - fu1) < fr_eps)));
+m_fu2 = sum(2*abs(signal_fft(abs(fr - fu2) < fr_eps)));
+
+% get dtmf decoding matrix indexes
+[~, fl] = max([m_fl1 m_fl2]);
+[~, fh] = max([m_fu1 m_fu2]);
+
+dtmf_tone = dtmf_matrix(fl, fh); % algorithm output
+
 %% autoexport figures to (pdf) files
 %  note: uncomment to save again
 
