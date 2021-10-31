@@ -7,7 +7,7 @@ clc;
 close all;
 clear all;
 
-% todo: address all todos!
+% todo: save all audio/sound files in respective folders
 
 %%  problem 1: manipulation of signals in the frequency domain
 
@@ -136,6 +136,87 @@ m_fu2 = sum(2*abs(signal_fft(abs(fr - fu2) < fr_eps)));
 
 dtmf_tone = dtmf_matrix(fl, fh); % algorithm output
 
+%% problem 5: telephone event tones
+
+Fs    = 10000; % sampling frequency, in hertz
+dbus  = 10;    % duration of busy signal, in seconds
+dcont = 5;     % duration of continuous dialtone, in seconds
+tbus  = linspace(0, dbus, dbus*Fs + 1);   % time range for busy signal
+tcont = linspace(0, dcont, dcont*Fs + 1); % time range for continuous dialtone
+
+busy_signal   = 0.5*(cos(2*pi*480*tbus) + cos(2*pi*620*tbus));
+busy_signal   = busy_signal .* pulstran(tbus, 0.25:1:10, @rectpuls, 0.5);
+cont_dialtone = 0.5*(cos(2*pi*350*tcont) + cos(2*pi*440*tcont));
+
+%% problem 6: helmholtz resonator
+
+
+%% problem 7: voice and instrument timbre comparison
+
+Fs  = 44100; % sampling frequency, in hertz
+dur = 5;     % duration of reference tone, in seconds
+t   = linspace(0, dur, dur*Fs + 1); % time range for reference tone
+N   = length(t);        % number of points in reference tone and its fft
+df  = Fs/N;             % frequency increment in nyquist range
+fr  = -Fs/2:df:Fs/2-df; % frequency range (nyquist range)
+a440_reftone = cos(2*pi*440*t); % 440Hz (middle A) reference tone
+
+% violin and voice recordings at 440Hz
+[a440_violin, Fs_violin] = audioread('../audio/7/a440_violin.m4a');
+[a440_voice, Fs_voice]   = audioread('../audio/7/a440_voice.wav');
+
+% fft of all signals
+N_violin = length(a440_violin); % number of points in violin signal
+N_voice  = length(a440_voice);  % number of points in voice signal
+df_violin = Fs_violin/N_violin; % frequency increment in violin recording
+df_voice  = Fs_voice/N_voice;   % frequency increment in voice recording
+fr_violin = -Fs_violin/2:df_violin:Fs_violin/2-df_violin; % violin frequency range
+fr_voice  = -Fs_voice/2:df_voice:Fs_voice/2-df_voice;     % voice frequency range
+
+fft_reftone = fftshift(fft(a440_reftone));
+fft_violin  = fftshift(fft(a440_violin));
+fft_voice   = fftshift(fft(a440_voice));
+
+
+% plot
+fig_5 = figure('Name', 'A-440Hz Pure Tone Spectra', 'NumberTitle', 'off');
+fig_6 = figure('Name', 'A-440Hz Violin Spectra', 'NumberTitle', 'off');
+fig_7 = figure('Name', 'A-440Hz Voice Spectra', 'NumberTitle', 'off');
+fig_8 = figure('Name', 'A-440Hz Violin Harmonics', 'NumberTitle', 'off');
+fig_9 = figure('Name', 'A-440Hz Voice Harmonics', 'NumberTitle', 'off');
+fsptr = 3000;
+fhar  = 1500;
+
+figure(fig_5);
+plot(fr(abs(fr) < fsptr), abs(fft_reftone(abs(fr) < fsptr)));
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude', 'Interpreter', 'latex');
+figure(fig_6);
+plot(fr_violin(abs(fr_violin) < fsptr), abs(fft_violin(abs(fr_violin) < fsptr)));
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude', 'Interpreter', 'latex');
+figure(fig_7);
+plot(fr_voice(abs(fr_voice) < fsptr), abs(fft_voice(abs(fr_voice) < fsptr)));
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude', 'Interpreter', 'latex');
+
+
+figure(fig_8);
+plot(fr_violin(abs(fr_violin - fhar) < fhar), abs(fft_violin(abs(fr_violin - fhar) < fhar)));
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude', 'Interpreter', 'latex');
+xticks(0:440:2*fhar);
+xtickangle(45);
+figure(fig_9);
+plot(fr_voice(abs(fr_voice - fhar) < fhar), abs(fft_voice(abs(fr_voice - fhar) < fhar)));
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude', 'Interpreter', 'latex');
+xticks(0:216:2*fhar);
+xtickangle(45);
+
+%% problem 8: chirp
+
+
 %% autoexport figures to (pdf) files
 %  note: uncomment to save again
 
@@ -143,3 +224,8 @@ dtmf_tone = dtmf_matrix(fl, fh); % algorithm output
 % savefig(fig_2, '../figs/problem1_sig');
 % savefig(fig_3, '../figs/problem2_fft_high_dur');
 % savefig(fig_4, '../figs/problem2_fft_low_dur');
+% savefig(fig_5, '../figs/problem7_a440_pure_spectra');
+% savefig(fig_6, '../figs/problem7_a440_violin_spectra');
+% savefig(fig_7, '../figs/problem7_a440_voice_spectra');
+% savefig(fig_8, '../figs/problem7_a440_violin_harmonics');
+% savefig(fig_9, '../figs/problem7_a440_voice_harmonics');
