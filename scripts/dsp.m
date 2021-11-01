@@ -256,8 +256,32 @@ plot(fr_sub, abs(fft_x_sub));
 xlabel('Frequency [Hz]', 'Interpreter', 'latex');
 ylabel('DFT Magnitude', 'Interpreter', 'latex');
 
-%% problem 9: spectrograms
+%% problem 9: manually constructing a spectrogram (or sonograph)
 
+Xs     = sonograph(x, 256);
+Xs_sub = sonograph(x_sub, 256);
+
+figure;
+imagesc(Xs);
+figure;
+imagesc(Xs_sub);
+figure;
+spectrogram(x,256,[],256,Fs,'yaxis');
+figure;
+spectrogram(x_sub,256,[],256,Fs,'yaxis');
+
+%% problem 10: doppler effect, spectrograms, and calculation of velocity
+
+[doppler, Fs_dop] = audioread('../audio/10/doppler.m4a');
+spectrogram(doppler,256*20,256*15,256*20,Fs_dop,'yaxis');
+
+%% problem 11: noise generation
+
+%% problem 12: uniformly random (white) noise signal
+
+N = 1000;       % number of points in the noise signal
+u = rand(1, N); % uniform random variable with support over (0,1)
+w = 2*u - 1;    % (uniform) white noise
 
 %% autoexport figures to (pdf) files
 %  note: uncomment to save again
