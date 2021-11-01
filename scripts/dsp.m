@@ -43,7 +43,7 @@ for k = 1:N
 end
 
 % inverse dft to get the sequence (time domain, sampled signal)
-xn = ifft(ifftshift(Xk)); % todo: this signal is not real before ifft! not sure why it is needed!!
+xn = ifft(ifftshift(Xk)); assert(isreal(xn)); % xn known to be real beforehand; assert result is real
 
 fig_1 = figure('Name', 'Frequency to Time Domain Signal Construction', 'NumberTitle', 'off');
 figure(fig_1);
@@ -257,17 +257,20 @@ xlabel('Frequency [Hz]', 'Interpreter', 'latex');
 ylabel('DFT Magnitude', 'Interpreter', 'latex');
 
 %% problem 9: manually constructing a spectrogram (or sonograph)
-figure;
-Xs     = sonograph(x, 256, Fs);
-figure;
-Xs_sub = sonograph(x_sub, 256, Fs_sub);
+
+fig_12 = figure('Name', 'Linear Chirp Sonograph', 'NumberTitle', 'off');
+fig_13 = figure('Name', 'Subsampled Linear Chirp Sonograph', 'NumberTitle', 'off');
+
+Xs     = sonograph(x, 256, Fs, fig_12);
+Xs_sub = sonograph(x_sub, 256, Fs_sub, fig_13);
 
 %% problem 10: doppler effect, spectrograms, and calculation of velocity
 
 [doppler, Fs_dop] = audioread('../audio/10/doppler.m4a');
-spectrogram(doppler,256*20,256*15,256*20,Fs_dop,'yaxis');
+spectrogram(doppler, 256*20, 256*15, 256*20, Fs_dop, 'yaxis');
 
 %% problem 11: noise generation
+
 
 
 %% problem 12: uniformly random (white) noise signal
@@ -290,3 +293,5 @@ w = 2*u - 1;    % (uniform) white noise
 % savefig(fig_9, '../figs/problem7_a440_voice_harmonics');
 % savefig(fig_10, '../figs/problem8_fft_linear_chirp');
 % savefig(fig_11, '../figs/problem8_fft_subsampled_linear_chirp');
+% savefig(fig_12, '../figs/problem9_sonogram_linear_chirp');
+% savefig(fig_13, '../figs/problem9_sonogram_subsampled_linear_chirp');
