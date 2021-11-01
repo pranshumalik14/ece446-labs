@@ -64,15 +64,15 @@ ylim([-1.1 1.1])
 Fs  = 44100; % sampling frequency, in hertz
 f   = 1000;  % frequency of signal, in hertz
 dur = 10;    % duration of the signal, in seconds
-N   = floor(dur * Fs);  % number of sampled points of the signal (for dft)
+N   = floor(dur*Fs);    % number of sampled points of the signal (for dft)
 df  = Fs/N;             % frequency increment in nyquist range
 fr  = -Fs/2:df:Fs/2-df; % frequency range (nyquist range)
 
-t   = linspace(0, dur, dur*Fs + 1); % time range
-x1  = sin(2*pi*f*t);                % original signal (high sampling duration)
+t   = linspace(0, dur, N); % time range
+x1  = sin(2*pi*f*t);       % original signal (high sampling duration)
 
-s = 1; t = 9;               % start and end of the zeroing-window 
-x2 = x1; x2(s*Fs:t*Fs) = 0; % cut signal (low sampling duration)
+st = 1; ter = 9;               % start and end of the zeroing-window 
+x2 = x1; x2(st*Fs:ter*Fs) = 0; % cut signal (low sampling duration)
 
 % get ffts
 X1 = fftshift(fft(x1));
@@ -99,7 +99,8 @@ ylabel('DFT Magnitude, $|X_2[k]|$', 'Interpreter', 'latex');
 
 Fs  = 10000; % sampling frequency, in hertz
 dur = 1;     % duration of the signal, in seconds
-t   = linspace(0, dur, dur*Fs + 1); % time range
+N   = floor(dur*Fs);  % number of sampled points of the signal
+t   = linspace(0, dur, N); % time range
 
 fl1 = 697;   % first lower band frequency, in hertz
 fl2 = 770;   % second lower band frequency, in hertz
@@ -141,8 +142,10 @@ dtmf_tone = dtmf_matrix(fl, fh); % algorithm output
 Fs    = 10000; % sampling frequency, in hertz
 dbus  = 10;    % duration of busy signal, in seconds
 dcont = 5;     % duration of continuous dialtone, in seconds
-tbus  = linspace(0, dbus, dbus*Fs + 1);   % time range for busy signal
-tcont = linspace(0, dcont, dcont*Fs + 1); % time range for continuous dialtone
+Nbus  = floor(dbus*Fs);  % number of sampled points in busy signal
+Ncont = floor(dcont*Fs); % number of sampled points in continuous dialtone
+tbus  = linspace(0, dbus, Nbus);   % time range for busy signal
+tcont = linspace(0, dcont, Ncont); % time range for continuous dialtone
 
 busy_signal   = 0.5*(cos(2*pi*480*tbus) + cos(2*pi*620*tbus));
 busy_signal   = busy_signal .* pulstran(tbus, 0.25:1:10, @rectpuls, 0.5);
@@ -153,12 +156,12 @@ cont_dialtone = 0.5*(cos(2*pi*350*tcont) + cos(2*pi*440*tcont));
 
 %% problem 7: voice and instrument timbre comparison
 
-Fs  = 44100; % sampling frequency, in hertz
-dur = 5;     % duration of reference tone, in seconds
-t   = linspace(0, dur, dur*Fs + 1); % time range for reference tone
-N   = length(t);        % number of points in reference tone and its fft
-df  = Fs/N;             % frequency increment in nyquist range
-fr  = -Fs/2:df:Fs/2-df; % frequency range (nyquist range)
+Fs  = 44100;         % sampling frequency, in hertz
+dur = 5;             % duration of reference tone, in seconds
+N   = floor(dur*Fs); % number of points in reference tone and its fft
+t   = linspace(0, dur, N);      % time range for reference tone
+df  = Fs/N;                     % frequency increment in nyquist range
+fr  = -Fs/2:df:Fs/2-df;         % frequency range (nyquist range)
 a440_reftone = cos(2*pi*440*t); % 440Hz (middle A) reference tone
 
 % violin and voice recordings at 440Hz
@@ -176,7 +179,6 @@ fr_voice  = -Fs_voice/2:df_voice:Fs_voice/2-df_voice;     % voice frequency rang
 fft_reftone = fftshift(fft(a440_reftone));
 fft_violin  = fftshift(fft(a440_violin));
 fft_voice   = fftshift(fft(a440_voice));
-
 
 % plot
 fig_5 = figure('Name', 'A-440Hz Pure Tone Spectra', 'NumberTitle', 'off');
@@ -200,7 +202,6 @@ plot(fr_voice(abs(fr_voice) < fsptr), abs(fft_voice(abs(fr_voice) < fsptr)));
 xlabel('Frequency [Hz]', 'Interpreter', 'latex');
 ylabel('DFT Magnitude', 'Interpreter', 'latex');
 
-
 figure(fig_8);
 plot(fr_violin(abs(fr_violin - fhar) < fhar), abs(fft_violin(abs(fr_violin - fhar) < fhar)));
 xlabel('Frequency [Hz]', 'Interpreter', 'latex');
@@ -214,7 +215,48 @@ ylabel('DFT Magnitude', 'Interpreter', 'latex');
 xticks(0:216:2*fhar);
 xtickangle(45);
 
-%% problem 8: chirp
+%% problem 8: linear chirp
+
+Fs  = 16000; % sampling frequency, in hertz
+dur = 1;     % duration of the signal, in seconds
+N   = floor(dur*Fs);       % number of sampled points of the signal
+t   = linspace(0, dur, N); % time range
+
+f0  = 500;  % initial frequency of signal, in hertz
+m   = 7000; % slope of instantaneous frequency, in hertz
+phi = @(t) 1/2*m*t.^2 + f0*t; % time-dependent linear chirp signal phase
+
+Fs_sub = 8000;                    % sub-sampling frequency, in hertz
+N_sub  = floor(dur*Fs_sub);       % number of points in sub-sampled signal
+t_sub  = linspace(0, dur, N_sub); % time range
+
+% create chirps
+x     = cos(2*pi*phi(t));     % linear chirp signal
+x_sub = cos(2*pi*phi(t_sub)); % under/sub-sampled linear chirp signal
+
+% ffts and plots
+df     = Fs/N;         % frequency increment
+df_sub = Fs_sub/N_sub; % frequency increment in subsampled signal
+fr     = -Fs/2:df:Fs/2-df; % frequency range
+fr_sub = -Fs_sub/2:df_sub:Fs_sub/2-df_sub; % frequency range in subsampled signal
+
+fft_x     = fftshift(fft(x));     % fft of chirp
+fft_x_sub = fftshift(fft(x_sub)); % fft of subsampled chirp
+
+fig_10 = figure('Name', 'Linear Chirp', 'NumberTitle', 'off');
+fig_11 = figure('Name', 'Subsampled Linear Chirp', 'NumberTitle', 'off');
+
+figure(fig_10);
+plot(fr, abs(fft_x));
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude', 'Interpreter', 'latex');
+
+figure(fig_11);
+plot(fr_sub, abs(fft_x_sub));
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude', 'Interpreter', 'latex');
+
+%% problem 9: spectrograms
 
 
 %% autoexport figures to (pdf) files
@@ -229,3 +271,5 @@ xtickangle(45);
 % savefig(fig_7, '../figs/problem7_a440_voice_spectra');
 % savefig(fig_8, '../figs/problem7_a440_violin_harmonics');
 % savefig(fig_9, '../figs/problem7_a440_voice_harmonics');
+% savefig(fig_10, '../figs/problem8_fft_linear_chirp');
+% savefig(fig_11, '../figs/problem8_fft_subsampled_linear_chirp');
