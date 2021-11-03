@@ -13,7 +13,7 @@ clear all;
 
 Fs  = 44100; % sampling frequency, in hertz
 dur = 3;     % duration of the signal, in seconds
-N   = floor(dur * Fs);  % number of sampled points of the signal (for dft)
+N   = floor(dur*Fs);    % number of sampled points of the signal (for dft)
 df  = Fs/N;             % frequency increment in nyquist range
 fr  = -Fs/2:df:Fs/2-df; % frequency range (nyquist range)
 
@@ -271,7 +271,35 @@ spectrogram(doppler, 256*20, 256*15, 256*20, Fs_dop, 'yaxis');
 
 %% problem 11: noise generation
 
+Fs  = 10000; % sampling frequency, in hertz
+dur = 5;     % duration of the noise signal, in seconds
+N   = floor(dur*Fs);       % number of sampled points of the signal
+t   = linspace(0, dur, N); % time range
+df  = Fs/N;                % frequency increment in nyquist range
+fr  = -Fs/2:df:Fs/2-df;    % frequency range (nyquist range)
 
+[wn, Wn] = noisegen(1, 0, Fs, dur); % white noise
+[pn, Pn] = noisegen(1, 1, Fs, dur); % pink noise
+[bn, Bn] = noisegen(1, 2, Fs, dur); % brown noise
+
+% plot time domain signal
+figure;
+plot(t, wn);
+figure;
+plot(t, pn);
+figure;
+plot(t, bn);
+figure;
+Wn = ifftshift(Wn);
+loglog(fr(fr > 0), abs(Wn(fr > 0).^2));
+figure;
+Pn = ifftshift(Pn);
+loglog(fr(fr > 0), abs(Pn(fr > 0).^2));
+figure;
+Bn = ifftshift(Bn);
+loglog(fr(fr > 0), abs(Bn(fr > 0).^2));
+
+% plot log-log power spectrum (the power spectrum is the square of the amplitude)
 
 %% problem 12: uniformly random (white) noise signal
 
