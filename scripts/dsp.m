@@ -267,28 +267,39 @@ Xs_sub = sonograph(x_sub, 256, Fs_sub, fig_13);
 %% problem 10: doppler effect, spectrograms, and calculation of velocity
 
 % compute and plot the spectrogram
+fig_14 = figure('Name', 'Jet Takeoff Spectrogram and Doppler Shift Tracking', 'NumberTitle', 'off');
+figure(fig_14);
 [doppler, Fs_dop] = audioread('../audio/10/doppler.m4a');
 spectrogram(doppler, 256*20, 256*15, 256*20, Fs_dop, 'yaxis');
 
 [s,f,t,p] = spectrogram(doppler, 256*20, 256*15, 256*20, Fs_dop, 'yaxis');
 
-% track the most significant chirp (all of which are caused by doppler effect)
+% track the most significant doppler shift ("doppler chirp")
 fr1 = f > 8500 & f < 9000; % first frequency range
 tr1 = t > 1.4  & t < 2.3;  % first time range
 fr2 = f > 7700 & f < 8800; % second frequency range
 tr2 = t > 2.3  & t < 3.1;  % second time range
-fr3 = f > 5300 & f < 7700; % third frequency range
-tr3 = t > 3.1  & t < 4.8;  % third time range
+fr3 = f > 5550 & f < 7700; % third frequency range
+tr3 = t > 3.1  & t < 4;    % third time range
+fr4 = f > 5400 & f < 5650; % forth frequency range
+tr4 = t > 4  & t < 4.8;    % fourth time range
 
 m1 = medfreq(p(fr1, tr1), f(fr1)); % median frequency being tracked over fr1 and tr1
 m2 = medfreq(p(fr2, tr2), f(fr2)); % median frequency being tracked over fr2 and tr2
 m3 = medfreq(p(fr3, tr3), f(fr3)); % median frequency being tracked over fr3 and tr3
-m  = [m1 m2 m3];
+m4 = medfreq(p(fr4, tr4), f(fr4)); % median frequency being tracked over fr4 and tr4
 
-% plot the tracked components
+% collate tracked median (f,t) pairs and smooth data (over a moving window)
+m  = smooth([m1 m2 m3 m4]);
+tm = [t(tr1) t(tr2) t(tr3) t(tr4)];
+
+% plot the tracked shift/chirp
 hold on;
-plot([t(tr1) t(tr2) t(tr3)], m/1000, 'linewidth', 2);
+pm = plot(tm, m/1000, 'linewidth', 4);
 hold off;
+pm.Color = [1.0, 0, 0, 0.1];
+
+% get the vel profile from data;
 
 %% problem 11: noise generation
 
@@ -377,6 +388,7 @@ ylabel('Amplitude', 'Interpreter', 'latex');
 % savefig(fig_11, '../figs/problem8_fft_subsampled_linear_chirp');
 % savefig(fig_12, '../figs/problem9_sonogram_linear_chirp');
 % savefig(fig_13, '../figs/problem9_sonogram_subsampled_linear_chirp');
+% savefig(fig_14, '../figs/problem10_jet_spectrogram_doppler_shift_tracking');
 % savefig(fig_16, '../figs/problem11_white_noise_time');
 % savefig(fig_17, '../figs/problem11_pink_noise_time');
 % savefig(fig_18, '../figs/problem11_brown_noise_time');
