@@ -282,38 +282,52 @@ fr  = -Fs/2:df:Fs/2-df;    % frequency range (nyquist range)
 [pn, Pn] = noisegen(1, Fs, dur); % pink noise
 [bn, Bn] = noisegen(2, Fs, dur); % brown noise
 
-% compute the noise psd from fft
-psdWn = Wn(fr > 0); psdWn = 2*(abs(psdWn).^2)/(Fs*N); psdWn(end) = [];
-psdPn = Pn(fr > 0); psdPn = 2*(abs(psdPn).^2)/(Fs*N); psdPn(end) = [];
-psdBn = Bn(fr > 0); psdBn = 2*(abs(psdBn).^2)/(Fs*N); psdBn(end) = [];
-psdfr = fr(fr > 0); psdfr(end) = [];
+% compute the noise power (amplitude squared) from fft
+pWn = Wn.*conj(Wn);
+pPn = Pn.*conj(Pn);
+pBn = Bn.*conj(Bn);
 
 % plot noise signal in time and frequency domains
-% fig_16 = figure('Name', 'Linear Chirp Sonograph', 'NumberTitle', 'off');
-% fig_17 = figure('Name', 'Subsampled Linear Chirp Sonograph', 'NumberTitle', 'off');
-% fig_18 = figure('Name', 'Linear Chirp Sonograph', 'NumberTitle', 'off');
-% fig_19 = figure('Name', 'Subsampled Linear Chirp Sonograph', 'NumberTitle', 'off');
-% fig_20 = figure('Name', 'Linear Chirp Sonograph', 'NumberTitle', 'off');
-% fig_21 = figure('Name', 'Subsampled Linear Chirp Sonograph', 'NumberTitle', 'off');
+fig_16 = figure('Name', 'White Noise over Time', 'NumberTitle', 'off');
+fig_17 = figure('Name', 'Pink Noise over Time', 'NumberTitle', 'off');
+fig_18 = figure('Name', 'Brown Noise over Time', 'NumberTitle', 'off');
+fig_19 = figure('Name', 'White Noise Power Spectrum', 'NumberTitle', 'off');
+fig_20 = figure('Name', 'Pink Noise Power Spectrum', 'NumberTitle', 'off');
+fig_21 = figure('Name', 'Brown Noise Power Spectrum', 'NumberTitle', 'off');
 
-figure;
+figure(fig_16);
 plot(t, wn);
-figure;
+xlabel('Time [s]', 'Interpreter', 'latex');
+ylabel('Amplitude', 'Interpreter', 'latex');
+
+figure(fig_17);
 plot(t, pn);
-figure;
+xlabel('Time [s]', 'Interpreter', 'latex');
+ylabel('Amplitude', 'Interpreter', 'latex');
+
+figure(fig_18);
 plot(t, bn);
-figure;
-loglog(psdfr, 10*log10(psdWn));
-figure;
-loglog(psdfr, 10*log10(psdPn));
-figure;
-loglog(psdfr, 10*log10(psdBn));
-figure;
-loglog(fr(fr > 0), abs(Wn(fr > 0)).^2);
-figure;
-loglog(fr(fr > 0), abs(Pn(fr > 0)).^2);
-figure;
-loglog(fr(fr > 0), abs(Bn(fr > 0)).^2);
+xlabel('Time [s]', 'Interpreter', 'latex');
+ylabel('Amplitude', 'Interpreter', 'latex');
+
+figure(fig_19);
+loglog(fr(fr > 0), pWn(fr > 0));
+ylim([1e3 1e4]);
+grid on;
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('Power Magnitude', 'Interpreter', 'latex');
+
+figure(fig_20);
+loglog(fr(fr > 0), pPn(fr > 0));
+grid on;
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('Power Magnitude', 'Interpreter', 'latex');
+
+figure(fig_21);
+loglog(fr(fr > 0), pBn(fr > 0));
+grid on;
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('Power Magnitude', 'Interpreter', 'latex');
 
 %% problem 12: uniformly random (white) noise signal
 
@@ -337,3 +351,9 @@ w = 2*u - 1;    % (uniform) white noise
 % savefig(fig_11, '../figs/problem8_fft_subsampled_linear_chirp');
 % savefig(fig_12, '../figs/problem9_sonogram_linear_chirp');
 % savefig(fig_13, '../figs/problem9_sonogram_subsampled_linear_chirp');
+% savefig(fig_16, '../figs/problem11_white_noise_time');
+% savefig(fig_17, '../figs/problem11_pink_noise_time');
+% savefig(fig_18, '../figs/problem11_brown_noise_time');
+% savefig(fig_19, '../figs/problem11_white_noise_power_spectrum');
+% savefig(fig_20, '../figs/problem11_pink_noise_power_spectrum');
+% savefig(fig_21, '../figs/problem11_brown_noise_power_spectrum');
