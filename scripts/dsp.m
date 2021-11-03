@@ -311,23 +311,22 @@ xlabel('Time [s]', 'Interpreter', 'latex');
 ylabel('Amplitude', 'Interpreter', 'latex');
 
 figure(fig_19);
-loglog(fr(fr > 0), pWn(fr > 0));
-ylim([1e3 1e4]);
+semilogx(fr(fr > 0), 10*log10(pWn(fr > 0)));
 grid on;
 xlabel('Frequency [Hz]', 'Interpreter', 'latex');
-ylabel('Power Magnitude', 'Interpreter', 'latex');
+ylabel('Power [dB]', 'Interpreter', 'latex');
 
 figure(fig_20);
-loglog(fr(fr > 0), pPn(fr > 0));
+semilogx(fr(fr > 0), 10*log10(pPn(fr > 0)));
 grid on;
 xlabel('Frequency [Hz]', 'Interpreter', 'latex');
-ylabel('Power Magnitude', 'Interpreter', 'latex');
+ylabel('Power [dB]', 'Interpreter', 'latex');
 
 figure(fig_21);
-loglog(fr(fr > 0), pBn(fr > 0));
+semilogx(fr(fr > 0), 10*log10(pBn(fr > 0)));
 grid on;
 xlabel('Frequency [Hz]', 'Interpreter', 'latex');
-ylabel('Power Magnitude', 'Interpreter', 'latex');
+ylabel('Power [dB]', 'Interpreter', 'latex');
 
 %% problem 12: uniformly random (white) noise signal
 
@@ -360,7 +359,7 @@ ylabel('Amplitude', 'Interpreter', 'latex');
 % savefig(fig_16, '../figs/problem11_white_noise_time');
 % savefig(fig_17, '../figs/problem11_pink_noise_time');
 % savefig(fig_18, '../figs/problem11_brown_noise_time');
-% savefig(fig_19, '../figs/problem11_white_noise_power_spectrum');
-% savefig(fig_20, '../figs/problem11_pink_noise_power_spectrum');
-% savefig(fig_21, '../figs/problem11_brown_noise_power_spectrum');
+% savefig(fig_19, '../figs/problem11_white_noise_power_spectrum_db');
+% savefig(fig_20, '../figs/problem11_pink_noise_power_spectrum_db');
+% savefig(fig_21, '../figs/problem11_brown_noise_power_spectrum_db');
 % savefig(fig_22, '../figs/problem12_uniform_white_noise_sequence');
