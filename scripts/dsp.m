@@ -278,11 +278,24 @@ t   = linspace(0, dur, N); % time range
 df  = Fs/N;                % frequency increment in nyquist range
 fr  = -Fs/2:df:Fs/2-df;    % frequency range (nyquist range)
 
-[wn, Wn] = noisegen(1, 0, Fs, dur); % white noise
-[pn, Pn] = noisegen(1, 1, Fs, dur); % pink noise
-[bn, Bn] = noisegen(1, 2, Fs, dur); % brown noise
+[wn, Wn] = noisegen(0, Fs, dur); % white noise
+[pn, Pn] = noisegen(1, Fs, dur); % pink noise
+[bn, Bn] = noisegen(2, Fs, dur); % brown noise
 
-% plot time domain signal
+% compute the noise psd from fft
+psdWn = Wn(fr > 0); psdWn = 2*(abs(psdWn).^2)/(Fs*N); psdWn(end) = [];
+psdPn = Pn(fr > 0); psdPn = 2*(abs(psdPn).^2)/(Fs*N); psdPn(end) = [];
+psdBn = Bn(fr > 0); psdBn = 2*(abs(psdBn).^2)/(Fs*N); psdBn(end) = [];
+psdfr = fr(fr > 0); psdfr(end) = [];
+
+% plot noise signal in time and frequency domains
+% fig_16 = figure('Name', 'Linear Chirp Sonograph', 'NumberTitle', 'off');
+% fig_17 = figure('Name', 'Subsampled Linear Chirp Sonograph', 'NumberTitle', 'off');
+% fig_18 = figure('Name', 'Linear Chirp Sonograph', 'NumberTitle', 'off');
+% fig_19 = figure('Name', 'Subsampled Linear Chirp Sonograph', 'NumberTitle', 'off');
+% fig_20 = figure('Name', 'Linear Chirp Sonograph', 'NumberTitle', 'off');
+% fig_21 = figure('Name', 'Subsampled Linear Chirp Sonograph', 'NumberTitle', 'off');
+
 figure;
 plot(t, wn);
 figure;
@@ -290,16 +303,17 @@ plot(t, pn);
 figure;
 plot(t, bn);
 figure;
-Wn = ifftshift(Wn);
-loglog(fr(fr > 0), abs(Wn(fr > 0).^2));
+loglog(psdfr, 10*log10(psdWn));
 figure;
-Pn = ifftshift(Pn);
-loglog(fr(fr > 0), abs(Pn(fr > 0).^2));
+loglog(psdfr, 10*log10(psdPn));
 figure;
-Bn = ifftshift(Bn);
-loglog(fr(fr > 0), abs(Bn(fr > 0).^2));
-
-% plot log-log power spectrum (the power spectrum is the square of the amplitude)
+loglog(psdfr, 10*log10(psdBn));
+figure;
+loglog(fr(fr > 0), abs(Wn(fr > 0)).^2);
+figure;
+loglog(fr(fr > 0), abs(Pn(fr > 0)).^2);
+figure;
+loglog(fr(fr > 0), abs(Bn(fr > 0)).^2);
 
 %% problem 12: uniformly random (white) noise signal
 
