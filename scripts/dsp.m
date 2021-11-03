@@ -335,6 +335,12 @@ N = 1000;       % number of points in the noise signal
 u = rand(1, N); % uniform random variable with support over (0,1)
 w = 2*u - 1;    % (uniform) white noise
 
+fig_22 = figure('Name', 'Uniform White Noise', 'NumberTitle', 'off');
+figure(fig_22);
+plot(1:N, w);
+xlabel('Time Sequence [n]', 'Interpreter', 'latex');
+ylabel('Amplitude', 'Interpreter', 'latex');
+
 %% autoexport figures to (pdf) files
 %  note: uncomment to save again
 
@@ -357,3 +363,4 @@ w = 2*u - 1;    % (uniform) white noise
 % savefig(fig_19, '../figs/problem11_white_noise_power_spectrum');
 % savefig(fig_20, '../figs/problem11_pink_noise_power_spectrum');
 % savefig(fig_21, '../figs/problem11_brown_noise_power_spectrum');
+% savefig(fig_22, '../figs/problem12_uniform_white_noise_sequence');
