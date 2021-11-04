@@ -299,7 +299,42 @@ pm = plot(tm, m/1000, 'linewidth', 4);
 hold off;
 pm.Color = [1.0, 0, 0, 0.1];
 
-% get the vel profile from data;
+% apparent frequency profile fitting using non-linear regression on tracking data
+N_dop = length(doppler);         % number of samples in the jet-takeoff doppler-effect sound signal
+dur   = floor(N_dop/Fs_dop);     % duration of the signal, in seconds
+t_dop = linspace(0, dur, N_dop); % corresponding timepoints in the doppler-effect signal
+c     = 343; % assumed speed of sound, in m/s, while recording
+
+% create model function explaining the data, or its expected relationship:
+% f_app(ts) is the model function, where ts is time in seconds. f_app has parameters
+% param = [f0, v, d, t0], where f0 is the stationary source freq, v is the source
+% velocity, d is the closest distance by which source passes the mic, and t0 is the time offset.
+% we set the initial guess at f0 = 7000Hz, v = 75m/s, d = 20m after some visual inspection.
+f_app  = @(param, ts) param(1) .* c./(c + param(2).*sin(atan(param(2).*(ts - param(4))./param(3))));
+param0 = [7000, 72, 20, 3.2];
+
+% non-linear regression fit using the model
+opts   = statset('TolFun', 1e-8);                       % set fit tolerance
+mdl    = fitnlm(tm, m, f_app, param0, 'Options', opts); % non-linear regression fit
+params = mdl.Coefficients{:, 'Estimate'};               % extract the estimated parameters
+
+% output best-fit estimate parameters
+f0 = params(1)
+v  = params(2)
+d  = params(3)
+
+% plot the best-fit profile and tracking data
+fig_15 = figure('Name', 'Apparent Non-linear Frequency Profile Fitting', 'NumberTitle', 'off');
+
+figure(fig_15);
+hold on;
+pm = plot(tm, m, 'linewidth', 4);
+pm.Color = [1.0, 0, 0, 0.25];
+plot(t_dop, f_app(params, t_dop),'-b');
+hold off;
+xlabel('Time [s]', 'Interpreter', 'latex');
+ylabel('Frequency [Hz]', 'Interpreter', 'latex');
+set(legend('Doppler-shift Data', 'Best-fit $f_{app}(t)$'), 'Interpreter', 'latex');
 
 %% problem 11: noise generation
 
@@ -389,6 +424,7 @@ ylabel('Amplitude', 'Interpreter', 'latex');
 % savefig(fig_12, '../figs/problem9_sonogram_linear_chirp');
 % savefig(fig_13, '../figs/problem9_sonogram_subsampled_linear_chirp');
 % savefig(fig_14, '../figs/problem10_jet_spectrogram_doppler_shift_tracking');
+% savefig(fig_15, '../figs/problem10_f_app_best_fit_estimate');
 % savefig(fig_16, '../figs/problem11_white_noise_time');
 % savefig(fig_17, '../figs/problem11_pink_noise_time');
 % savefig(fig_18, '../figs/problem11_brown_noise_time');
