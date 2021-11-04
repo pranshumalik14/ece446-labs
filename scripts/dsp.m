@@ -153,6 +153,34 @@ cont_dialtone = 0.5*(cos(2*pi*350*tcont) + cos(2*pi*440*tcont));
 
 %% problem 6: helmholtz resonator
 
+[empty_bottle, Fs_empty] = audioread('../audio/6/empty_bottle_resonance.m4a');
+[fill_bottle, Fs_fill]   = audioread('../audio/6/one_third_filled_bottle_resonance.m4a');
+
+N_empty = length(empty_bottle); % number of points in empty-bottle resonance
+N_fill  = length(fill_bottle);  % number of points in (partially) filled-bottle resonance
+
+fft_empty  = fftshift(fft(empty_bottle)); % fft of empty-bottle resonance recording
+fft_fill   = fftshift(fft(fill_bottle));  % fft of filled-bottle resonance recording
+
+df_empty = Fs_empty/N_empty; % frequency increment in empty-bottle recording
+df_fill  = Fs_fill/N_fill;   % frequency increment in filled-bottle recording
+fr_empty = -Fs_empty/2:df_empty:Fs_empty/2-df_empty; % empty-bottle recording frequency range
+fr_fill  = -Fs_fill/2:df_fill:Fs_fill/2-df_fill;     % filled-bottle recording frequency range
+fsptr_empty = 100 < fr_empty & fr_empty < 300;       % plotting spectrum for empty bottle
+fsptr_fill  = 100 < fr_fill  & fr_fill  < 300;       % plotting spectrum for filled bottle
+
+fig_empty = figure('Name', 'Empty Bottle Resonance Spectra', 'NumberTitle', 'off');
+fig_fill  = figure('Name', 'Partially Filled Bottle Resonance Spectra', 'NumberTitle', 'off');
+
+figure(fig_empty);
+plot(fr_empty(fsptr_empty), abs(fft_empty(fsptr_empty)));
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude', 'Interpreter', 'latex');
+
+figure(fig_fill);
+plot(fr_fill(fsptr_fill), abs(fft_fill(fsptr_fill)));
+xlabel('Frequency [Hz]', 'Interpreter', 'latex');
+ylabel('DFT Magnitude', 'Interpreter', 'latex');
 
 %% problem 7: voice and instrument timbre comparison
 
@@ -432,3 +460,5 @@ ylabel('Amplitude', 'Interpreter', 'latex');
 % savefig(fig_20, '../figs/problem11_pink_noise_power_spectrum_db');
 % savefig(fig_21, '../figs/problem11_brown_noise_power_spectrum_db');
 % savefig(fig_22, '../figs/problem12_uniform_white_noise_sequence');
+% savefig(fig_empty, '../figs/problem6_empty_bottle_resonance_spectra');
+% savefig(fig_fill, '../figs/problem6_filled_bottle_resonance_spectra');
