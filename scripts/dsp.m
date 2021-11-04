@@ -1,13 +1,11 @@
 %% ece446: sensory communication
 %  dsp problem set
 %  author: Pranshu Malik
-%  date: 28 October 2021
+%  date: 4 November 2021
 
 clc;
 close all;
 clear all;
-
-% todo: save all audio/sound files in respective folders
 
 %%  problem 1: manipulation of signals in the frequency domain
 
