@@ -14,7 +14,7 @@
 \maketitle
 
 \section{Manipulation of Signals in the Frequency Domain}
-Matches $\hat{x}(t) = \cos(2\pi440t) - \sin(2\pi660t)$ sampled at $t = nT_s$, i.e. $\hat{x}[n] \coloneqq \hat{x}(nT_s)$. By a similar transformation, we can recover the time-domain equaivalent of the signal, showing as scaled deltas. This is one part of the internals in \texttt{sound} function in matlab. The sound can be played here: give github repo/online host.
+To construct the signal in the frequency domain, we need to know the Fourier transform of the signal under consideration. The signal we want to construct are phasors, which are fundamentally a cosine signal, i.e. $\text{Re}(Ae^{jf(t,\phi)}) = A\cos(f(t,\phi)) = Ae^{jg(\phi)} = \Tilde{A}$. The continuous-time continuous-frequency Fourier transform (CTFT) for such a cosine is given by $\mathcal{F}\{\cos(\Omega_0t)\} = \pi(\delta(\Omega - \Omega_0) + \delta(\Omega + \Omega_0))$. Now, to be able to use this transform on a computer, we have to use the discrete-time discrete-frequency form of the Fourier transform, known as Discrete Fourier transform (DFT), and the fundamental idea behind it is to sample the continuous-frequency discrete-time Fourier transform (DTFT) at at equal intervals of $\frac{2\pi}{N}$ over a period of $2\pi$, be it from $[-\pi, \pi)$ or $[0, 2\pi)$, where $N$ is the number of points in the sampled signal of interest. The DTFT is a frequency-normalized and repeating version of CTFT of the signal, i.e. $X(e^{j\omega}) = \frac{1}{T_s}\sum_{k=-\infty}^{\infty}X_c(j(\frac{\omega}{T_s} - \frac{2\pi k}{T_s}))$, where $T_s = \frac{1}{F_s}$ is the sampling interval, $\omega = \Omega T \text{ [rad]}$ is the normalized angular frequency, and $X_c(j\Omega)$ is the CTFT of $x(t)$. Therefore, the DFT components for $0\leq k < N$ can be written as $X[k] = X(e^{j(\frac{2\pi}{N})k}) = X(e^{j\omega})\rvert_{\omega = (\frac{2\pi}{N})k}$, and zero for $k$ everywhere else. In code, we have followed this procedure to construct the DFT $X[k]$ of the desired signal $x[n]$ consisting of two phasors at frequencies $440$Hz and $660$Hz and with a relative phase shift of $\frac{\pi}{2}$. Thus, the result in time domain, we already know, should be match $\hat{x}(t) = \cos(2\pi440t) - \sin(2\pi660t)$ sampled at $t = nT_s$, i.e. $\hat{x}[n] \coloneqq \hat{x}(nT_s)$. This has been verified and the frequency and time domain plots for $x[n]$ are shown in figure \ref{freq_domain_design_for_time_domain_signal}.
 
 \begin{figure}[ht]
     \centering
@@ -27,70 +27,65 @@ Matches $\hat{x}(t) = \cos(2\pi440t) - \sin(2\pi660t)$ sampled at $t = nT_s$, i.
         \includegraphics[width=\textwidth]{problem1_sig.pdf}
         % \caption{}
     \end{subfigure}
-    \caption{Signals nice ones <>\vspace{-0.5cm}}
+    \caption{Frequency and time domain representations of $x[n]$\vspace{-0.5cm}}
     \label{freq_domain_design_for_time_domain_signal}
 \end{figure}
 
-More text here.
-
 \section{Effect of Time Windowing on the Frequency Spectra}
 
-Done. Some explanation. See \ref{time_bandwidth_tradeoff} for more info. THough notice, that there is no visible deviation from the true frequency, however if samples (and hence sampling duration) were low enough, we would see a distortion in the freq spectrum due to overlapping/conv with rect....
+We can practically only observe finite length signals, and this has a fundamental implication on how well we can localize the frequency information over the time which it happens. This is known as the time-frequency trade-off, which arises due to the convolution of the time-window spectra with the spectra of the infinite-length signal. Figures \ref{time_bandwidth_tradeoff} (a) and (b) show the effect of relatively decreasing the observation time window of a sinusoidal signal, where we can clearly see that in (a) the energy is more sharply localized at frequency $f_0 = 1000$Hz while (b) has larger spread (or distortion) around $f_0$ with a broader $\text{sinc}$ function. As a limiting case, we would expect the positive spectra to converge to a $\delta$ function for an infinite-length time window. In general, this is expressed as the time-bandwidth relation where $\Delta f$ is the observed bandwidth and $\Delta t$ is the observation period,
+
+\[
+\Delta f \Delta t \geq 1 
+\]
 
 \begin{figure}[ht]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem2_fft_high_dur.pdf}
-        \caption{High Dur}
+        \caption{Spectra for $\Delta t=10$s}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem2_fft_low_dur.pdf}
-        \caption{Low Dur}
+        \caption{Spectra for (net) $\Delta t=2$s}
     \end{subfigure}
-    \caption{Effect of dur of FFT <>\vspace{-0.5cm}}
+    \caption{Effect of decreasing time window on frequency spectra\vspace{-0.5cm}}
     \label{time_bandwidth_tradeoff}
 \end{figure}
 
 \section{Telephone Dial Tones}
-Done. The dialtone signals were generated using the given $f_\text{low}$ and $f_\text{high}$. mention the freq combinations for dialtones 1, 2, and 4.
+Each dial tone signal was generated adding two sinusoidal signals with the corresponding frequencies $f_\text{lower}$ and $f_\text{upper}$ listed in the DTMF (dual-tone multi-frequency) standard table.
 \[
-    0.5*(cos(2*pi*fl1*t) + cos(2*pi*fu1*t));
+    \frac{1}{2}(\cos(2\pi f_\text{lower}t) + \cos(2\pi f_\text{upper}t))
 \]
 
 \section{Dial Tone Decode Algorithm}
-Done. In real life, this can also be done using an analog circuit, with parallel and tuned filters with mediocre $Q$ to make them robust to noise on the channel, hence our decision to include an $\epsilon -$frequency band (\texttt{fr\_eps} in code) for robustness to noise and distortion.
+Given a DTMF signal, we would like to decode which key it corresponds to. This can be easily achieved once we know the $f_\text{lower}$ and $f_\text{upper}$ frequencies involved in the signal. Although this can be done using an analog circuit with tuned filters (in parallel) with a mediocre $Q$ for making them robust to noise on the channel, we would like to develop the digital version of the process, an algorithm, that can be implemented, for example, on a microprocessor. Moreover, to  make it robust to noise and distortion in the same way as the circuits, we introduce an $\epsilon -$frequency band around each DTMF frequency bin. The procedure for this is listed in algorithm \ref{alg:dtmf_decode_algorithm}, and the corresponding \textsc{MATLAB} code can be found in the appendix.
 
-The algorithm is as follows:
 \begin{figure}[ht]
   \centering
-  \begin{minipage}{.5\linewidth}
+  \begin{minipage}{.64\linewidth}
         \begin{algorithm}[H]
-            \caption{An algorithm with caption}\label{alg:cap}
+            \caption{Robust DTMF Decoder}
+            \label{alg:dtmf_decode_algorithm}
             \begin{algorithmic}
-                \Require $n \geq 0$
-                \Ensure $y = x^n$
-                \State $y \gets 1$
-                \State $X \gets x$
-                \State $N \gets n$
-                \While{$N \neq 0$}
-                \If{$N$ is even}
-                    \State $X \gets X \times X$
-                    \State $N \gets \frac{N}{2}$  \Comment{This is a comment}
-                \ElsIf{$N$ is odd}
-                    \State $y \gets y \times X$
-                    \State $N \gets N - 1$
-                \EndIf
-                \EndWhile
+                \Require Signal $x[n]$, sampling rate $F_s$, DTMF table $(f_l, f_u) \mapsto k$
+                \State $\epsilon \gets \texttt{fr\_eps}$
+                \State $X \gets \mathcal{F}\{x[n]\}$ \Comment{FFT of the signal}
+                \For{$\forall f_{l,i} \in f_\text{lower} \text{ and } f_{u,j} \in f_\text{upper}$}
+                    \State $(m_{l, i},m_{u, j}) \gets \left(\sum_f||X(f-f_{l,i} < \epsilon)||, \sum_f||X(f-f_{u,j} < \epsilon)||\right)$
+                \EndFor
+                \State $f_l = \argmax_i \quad [m_{l, i}]$  \Comment{Get index of the maximum}
+                \State $f_u = \argmax_j \quad [m_{u, j}]$
+                \State \Return DTMF$(f_l, f_u)$ \Comment{corresponding key $k$ is returned}
             \end{algorithmic}
         \end{algorithm}
     \end{minipage}
 \end{figure}
 
-The \textsc{MATLAB} code can be found in the appendix.
-
 \section{Telephone Event Tones}
-Done. The telephone event tones were generated in a similar fashion to problem 3. Check the dsp script for the code.
+The tones for busy and continuous dial events were generated using the method described in section 3.
 
 \section{Helmholtz Resonators}
 Done. $\omega = c\sqrt{\frac{S}{V_0l}}$. Did about 1/3 bottle as getting 1/2 to resonante was very hard for the type of bottle. $153.4\sqrt{\frac{3}{2}} = 187.87 \approx 190.7$.
