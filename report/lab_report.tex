@@ -14,7 +14,7 @@
 \maketitle
 
 \section{Manipulation of Signals in the Frequency Domain}
-To construct the signal in the frequency domain, we need to know the Fourier transform of the signal under consideration. The signal we want to construct are phasors, which are fundamentally a cosine signal, i.e. $\text{Re}(Ae^{jf(t,\phi)}) = A\cos(f(t,\phi)) = Ae^{jg(\phi)} = \Tilde{A}$. The continuous-time continuous-frequency Fourier transform (CTFT) for such a cosine is given by $\mathcal{F}\{\cos(\Omega_0t)\} = \pi(\delta(\Omega - \Omega_0) + \delta(\Omega + \Omega_0))$. Now, to be able to use this transform on a computer, we have to use the discrete-time discrete-frequency form of the Fourier transform, known as Discrete Fourier transform (DFT), and the fundamental idea behind it is to sample the continuous-frequency discrete-time Fourier transform (DTFT) at at equal intervals of $\frac{2\pi}{N}$ over a period of $2\pi$, be it from $[-\pi, \pi)$ or $[0, 2\pi)$, where $N$ is the number of points in the sampled signal of interest. The DTFT is a frequency-normalized and repeating version of CTFT of the signal, i.e. $X(e^{j\omega}) = \frac{1}{T_s}\sum_{k=-\infty}^{\infty}X_c(j(\frac{\omega}{T_s} - \frac{2\pi k}{T_s}))$, where $T_s = \frac{1}{F_s}$ is the sampling interval, $\omega = \Omega T \text{ [rad]}$ is the normalized angular frequency, and $X_c(j\Omega)$ is the CTFT of $x(t)$. Therefore, the DFT components for $0\leq k < N$ can be written as $X[k] = X(e^{j(\frac{2\pi}{N})k}) = X(e^{j\omega})\rvert_{\omega = (\frac{2\pi}{N})k}$, and zero for $k$ everywhere else. In code, we have followed this procedure to construct the DFT $X[k]$ of the desired signal $x[n]$ consisting of two phasors at frequencies $440$Hz and $660$Hz and with a relative phase shift of $\frac{\pi}{2}$. Thus, the result in time domain, we already know, should be match $\hat{x}(t) = \cos(2\pi440t) - \sin(2\pi660t)$ sampled at $t = nT_s$, i.e. $\hat{x}[n] \coloneqq \hat{x}(nT_s)$. This has been verified and the frequency and time domain plots for $x[n]$ are shown in figure \ref{freq_domain_design_for_time_domain_signal}.
+To construct the signal in the frequency domain, we need to know the Fourier transform of the signal under consideration. The signal we want to construct are phasors, which are fundamentally cosine signals, i.e. $\text{Re}(Ae^{jf(t,\phi)}) = A\cos(f(t,\phi)) = Ae^{jg(\phi)} = \Tilde{A}$ for some functions $f$ and $g$. The continuous-time continuous-frequency Fourier transform (CTFT) for such a cosine is given by $\mathcal{F}\{\cos(\Omega_0t)\} = \pi(\delta(\Omega - \Omega_0) + \delta(\Omega + \Omega_0))$. Now, to be able to use this transform on a computer, we have to use the discrete-time discrete-frequency form of the Fourier transform, known as Discrete Fourier transform (DFT), and the fundamental idea behind it is to sample the continuous-frequency discrete-time Fourier transform (DTFT) at at equal intervals of $\frac{2\pi}{N}$ over a period of $2\pi$, be it from $[-\pi, \pi)$ or $[0, 2\pi)$, where $N$ is the number of points in the sampled signal of interest. The DTFT is a frequency-normalized and repeating version of CTFT of the signal, i.e. $X(e^{j\omega}) = \frac{1}{T_s}\sum_{k=-\infty}^{\infty}X_c(j(\frac{\omega}{T_s} - \frac{2\pi k}{T_s}))$, where $T_s = \frac{1}{F_s}$ is the sampling interval, $\omega = \Omega T \text{ [rad]}$ is the normalized angular frequency, and $X_c(j\Omega)$ is the CTFT of $x(t)$. Therefore, the DFT components for $0\leq k < N$ can be written as $X[k] = X(e^{j(\frac{2\pi}{N})k}) = X(e^{j\omega})\rvert_{\omega = (\frac{2\pi}{N})k}$, and zero for $k$ everywhere else. In code, we have followed this procedure to construct the DFT $X[k]$ of the desired signal $x[n]$ consisting of two phasors at frequencies $440$Hz and $660$Hz and with a relative phase shift of $\frac{\pi}{2}$. Thus, the result in time domain, we already know, should be match $\hat{x}(t) = \cos(2\pi440t) - \sin(2\pi660t)$ sampled at $t = nT_s$, i.e. $\hat{x}[n] \coloneqq \hat{x}(nT_s)$. This has been verified and the frequency and time domain plots for $x[n]$ are shown in figure \ref{freq_domain_design_for_time_domain_signal}.
 
 \begin{figure}[ht]
     \centering
@@ -70,49 +70,51 @@ Given a DTMF signal, we would like to decode which key it corresponds to. This c
             \caption{Robust DTMF Decoder}
             \label{alg:dtmf_decode_algorithm}
             \begin{algorithmic}
-                \Require Signal $x[n]$, sampling rate $F_s$, DTMF table $(f_l, f_u) \mapsto k$
+                \Require Signal $x[n]$, sampling rate $F_s$, DTMF table $(L, U) \mapsto k$
                 \State $\epsilon \gets \texttt{fr\_eps}$
                 \State $X \gets \mathcal{F}\{x[n]\}$ \Comment{FFT of the signal}
-                \For{$\forall f_{l,i} \in f_\text{lower} \text{ and } f_{u,j} \in f_\text{upper}$}
-                    \State $(m_{l, i},m_{u, j}) \gets \left(\sum_f||X(f-f_{l,i} < \epsilon)||, \sum_f||X(f-f_{u,j} < \epsilon)||\right)$
+                \For{$\forall f_{l,i} \in f_\text{lower} \text{ and } \forall f_{u,j} \in f_\text{upper}$}
+                    \State $m_{l, i} \gets \sum_f||X(f-f_{l,i} < \epsilon)||$
+                    \State $m_{u, j} \gets \sum_f||X(f-f_{u,j} < \epsilon)||$
                 \EndFor
-                \State $f_l = \argmax_i \quad [m_{l, i}]$  \Comment{Get index of the maximum}
-                \State $f_u = \argmax_j \quad [m_{u, j}]$
-                \State \Return DTMF$(f_l, f_u)$ \Comment{corresponding key $k$ is returned}
+                \State $L = \argmax_i \quad [m_{l, i}]$  \Comment{Get index of the maximum}
+                \State $U = \argmax_j \quad [m_{u, j}]$
+                \State \Return DTMF$(L, U)$ \Comment{corresponding key $k$ is returned}
             \end{algorithmic}
         \end{algorithm}
     \end{minipage}
+    \caption{Algorithm for decoding DTMF tones to the corresponding key}
 \end{figure}
 
 \section{Telephone Event Tones}
 The tones for busy and continuous dial events were generated using the method described in section 3.
 
 \section{Helmholtz Resonators}
-Done. $\omega = c\sqrt{\frac{S}{V_0l}}$. Did about 1/3 bottle as getting 1/2 to resonante was very hard for the type of bottle. $153.4\sqrt{\frac{3}{2}} = 187.87 \approx 190.7$.
+The Helmholtz frequency for a resonator, $\omega_H = 2\pi f_H$, is given by $\omega_H = c\sqrt{\frac{S}{V_0l}}$, where $S$ is the cross-sectional area of the neck, $l$ is the length of the neck, $V_0$ is the volume of the cavity or resonator, and $c=343$m/s is the speed of sound at $20^\circ$C. For a chosen bottle as a Helmholtz resonator, we were interested in finding its resonant frequency and its change with a decrease in available volume by a factor. After repeated trials, this factor was chosen to be $\frac{1}{3}$ instead of the suggested value of $\frac{1}{2}$, mainly since it was harder to achieve resonance for the half-filled bottle without creating excess noise caused by the blowing of air. Due to the volume change, we then had the cavity volume $V_1 = \frac{2}{3}V_0$ and we expected the observed resonant frequencies to shift by a factor of $\frac{\widehat{\omega_H}}{\omega_H} = \sqrt{\frac{V_0}{V_1}} = \sqrt{\frac{3}{2}}$. The chosen bottle had $V_0 = 750$ml, $l=1$cm, and cross-sectional diameter $D=2$cm. The resonant frequencies were observed as peaks on the FFT spectra shown in figure \ref{helmholtz_resonance}. For the empty bottle, we observed $f_h = 153.4$Hz, which is different from the expected value of $f_{H, \text{exp}} = 353.3$Hz. This could be because of the larger mouth of the bottle and the assumption for $V_0 \gg Sl$ not holding that well. However, the expected resonant frequency, $f_{H, \text{exp}} = 158$Hz, comes closer to $f_{H}$ for $l=5$cm. The observed frequency for the one-third filled bottle was $\widehat{f_H} = 190.7$Hz which is close to $f_H\sqrt{\frac{3}{2}} = 187.87\text{Hz} \approx 190.7$Hz. This confirms the inverse $\sqrt{V}$ relationship with the resonant frequency even if the apparent parameters for the resonator might be different than the measurements.
 
 \begin{figure}[ht]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem6_empty_bottle_resonance_spectra.pdf}
-        \caption{High Dur}
+        \caption{$f_H$ for empty bottle}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem6_filled_bottle_resonance_spectra.pdf}
-        \caption{Low Dur}
+        \caption{$f_H$ for one-third filled bottle}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[scale=0.15]{bottle.png}
-        \caption{Low Dur}
+        \caption{Helmholtz resonator}
     \end{subfigure}
-    \caption{Helmholtz Resonance on A bottle\vspace{-0.5cm}}
+    \caption{Observing Helmholtz resonance in a bottle\vspace{-0.5cm}}
     \label{helmholtz_resonance}
 \end{figure}
 
 \section{Comparison of Voice and Instrument Timbre}
-Violin has 440 as the fundamental harmonic and has 2 sub harmonics and all above; structure to the spread. Voice has two main harmonics 440 and 220 and they reduce in magnitude, without much "structure". Shows different timbre (or lack of, thereof).
+Violin has 440 as the fundamental harmonic and has 2 sub harmonics and all above; structure to the spread. Voice has two main harmonics 440 and 220 and they reduce in magnitude, without much "structure". Shows different timbre (or lack of, thereof). Notice the location of the peaks and the relative magnitudes of the peak. What do you see in common, what is different between the voice and the musical instrument?
 
 \begin{figure}[ht]
     \centering
@@ -183,7 +185,14 @@ Done. The spectrogram was made using rectangular windows with no overlaps. This 
 \end{figure}
 
 \section{Doppler Effect and Tracking Chirps on Spectrograms}
-Done. $f_0 = 6.7418e+03$, $v = 84.4658$, $d=40.4337$.
+The apparent frequency is:
+\[
+f_\text{app}(t) = f_0 \frac{c}{c + v\sin\left(\arctan\left(\frac{v(t-t_0)}{d}\right)\right)}
+\]
+
+Where it crosses the closest distance $d$ at $t = t_0$.
+
+$f_0 = 6.7418e+03$, $v = 84.4658$, $d=40.4337$, $t_0 = 3.29$s.
 
 \begin{figure}[ht]
     \centering
