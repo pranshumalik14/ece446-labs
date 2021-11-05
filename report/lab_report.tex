@@ -114,121 +114,116 @@ The Helmholtz frequency for a resonator, $\omega_H = 2\pi f_H$, is given by $\om
 \end{figure}
 
 \section{Comparison of Voice and Instrument Timbre}
-Violin has 440 as the fundamental harmonic and has 2 sub harmonics and all above; structure to the spread. Voice has two main harmonics 440 and 220 and they reduce in magnitude, without much "structure". Shows different timbre (or lack of, thereof). Notice the location of the peaks and the relative magnitudes of the peak. What do you see in common, what is different between the voice and the musical instrument?
+Here we compared the middle A note (at $440$Hz) played by a violin and sung by a human (the author in this case). The notes in both cases sound quite different and that is attributed to the timbre of the instrument. Since the instrument has a complex body associated with it, on playing it different modes are excited which give rise to a set of structured harmonics that collectively produce the note. The violin has $440$Hz as the fundamental harmonic two sub-harmonics, and all along there is a structure to the spread of energy in the spectra. On the other hand, human voice recorded for this note has its main harmonic at $432$Hz with a significant sub-harmonic at $216$Hz and their multiples reduce in magnitude without much "structure". Additionally, the two signals are different in the time domain even though the dominant frequencies might be the same, specifically with the instrument having a characteristic intensity curve over time. The spectral comparison for the violin and human voice is shown in figure \ref{note_timbre_harmonics}.
 
 \begin{figure}[ht]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem7_a440_violin_spectra.pdf}
-        \caption{High Dur}
+        \caption{Spectra for middle A ($440$Hz) on a violin}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem7_a440_voice_spectra.pdf}
-        \caption{Low Dur}
+        \caption{Spectra for middle A ($440$Hz) in human voice}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem7_a440_violin_harmonics.pdf}
-        \caption{Violin Harmonics}
+        \caption{Harmonics in the violin note}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem7_a440_voice_harmonics.pdf}
-        \caption{Low Dur}
+        \caption{Harmonics in the voice note}
     \end{subfigure}
     % \quad
     % \begin{subfigure}[b]{0.48\textwidth}
     %     \includegraphics[width=\textwidth]{problem7_a440_pure_spectra.pdf}
     %     \caption{Low Dur}
     % \end{subfigure}
-    \caption{Spectra and Harmonics of the Signals\vspace{-0.5cm}}
+    \caption{Comparing the spectra and harmonics in voice and instrument\vspace{-0.5cm}}
     \label{note_timbre_harmonics}
 \end{figure}
 
-Notice that the harmonics are present at multiple types and for diff frequencies.
-
 \section{Creating Chirps}
-Done.
+A chirp is a signal whose (instantaneous) frequency changes with time, e.g. a constant amplitude chirp $x(t) = cos(2\pi\phi(t))$ where the instantaneous frequency, $f$, is given by $f(t) = \frac{d\phi}{dt}$. We considered a constant amplitude linear chirp starting at $500$Hz and reaching $7.5$kHz at $t=1$s will have $\phi(t) = \frac{1}{2}7000t^2 + 500t$. Here we sampled such a chirp at $F_s = 16$kHz as well as $8$KHz which is below the Nyquist rate ($15$kHz in this case) and is expected to cause aliasing in which, due to sub-sampling, the energy in the higher frequencies overlaps on lower frequency bands (in this case the whole spectra). This is confirmed in the frequency spectra for both signals shown in figure \ref{linear_chirp_fft}. Theoretically, the sampled signal can contain the maximum frequency of $\frac{F_s}{2}$ which is also what we observe in the spectra (and spectrograms in the next section).
 
 \begin{figure}[ht]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem8_fft_linear_chirp.pdf}
-        \caption{High Dur}
+        \caption{$F_s = 16$KHz}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem8_fft_subsampled_linear_chirp.pdf}
-        \caption{Low Dur}
+        \caption{$F_s = 8$KHz, aliased}
     \end{subfigure}
-    \caption{Linear Chirps\vspace{-0.5cm}}
+    \caption{Linear chirp spectra and the effect of sub-sampling\vspace{-0.5cm}}
     \label{linear_chirp_fft}
 \end{figure}
 
 \section{Developing Simple Spectrograms}
-Done. The spectrogram was made using rectangular windows with no overlaps. This causes spctral leakage, but since we have crafted a signal with exact frequencies and single tones at any given time, the spectrogram is very clear. Check figure xyz. In code, we call this manual construction function a \texttt{sonograph} as an alias, since the \texttt{spectrogram} function already exists in \textsc{MATLAB}.
+The spectrogram involved segmenting the time signal, potentially with overlaps, and then multiplying the segments with a windowing function after which an FFT for each segment and plotted over time range it signifies. A simple spectrogram can be made using rectangular windows with no overlaps, although this choice causes significant spectral leakage. But since we have crafted a signal (linear chirp in section 8) which has a single frequency at any given time, this choice for creating the spectrogram still produces good results that also match our expectation. In code, we have bundled this procedure in the custom \texttt{sonograph} function which is an alias of the \texttt{spectrogram} (built-in) function in \textsc{MATLAB}. The spectrograms for both chirp signals are shown in figure \ref{linear_chirp_spectrogram}.
 
 \begin{figure}[ht]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem9_sonogram_linear_chirp.pdf}
-        \caption{High Dur}
+        \caption{Spectrogram for the linear chirp with $F_s = 16$kHz}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem9_sonogram_subsampled_linear_chirp.pdf}
-        \caption{Low Dur}
+        \caption{Spectrogram for the linear chirp with $F_s = 8$kHz}
     \end{subfigure}
-    \caption{Linear Chirps\vspace{-0.5cm}}
+    \caption{Spectrograms of linear chirps\vspace{-0.5cm}}
     \label{linear_chirp_spectrogram}
 \end{figure}
 
 \section{Doppler Effect and Tracking Chirps on Spectrograms}
-The apparent frequency is:
+For an object moving with constant velocity, the apparent frequency $f_\text{app}(t)$ of a pure tone source as measured by a stationary observer is given by the expression,
 \[
-f_\text{app}(t) = f_0 \frac{c}{c + v\sin\left(\arctan\left(\frac{v(t-t_0)}{d}\right)\right)}
+f_\text{app}(t) = f_0 \frac{c}{c + v\sin\left(\arctan\left(\frac{v(t-t_0)}{d}\right)\right)},
 \]
-
-Where it crosses the closest distance $d$ at $t = t_0$.
-
-$f_0 = 6.7418e+03$, $v = 84.4658$, $d=40.4337$, $t_0 = 3.29$s.
+where $f_0$ is the frequency of the source when it is stationary, $v$ the velocity of the source, $d$ the closest distance by which the source passes the microphone at t = $t_0$, and $c$ is the speed of sound. We were given to deduce the $f_0, v, \text{ and } d$ from a Learjet takeoff recording. The spectrogram highlighting the most prominent frequency shift along with the best-fit for $f_\text{app}(t)$ is shown in figure \ref{doppler_shift_chirp}. The parameters for the best-fit, using non-linear regression, were found to be $f_0 = 6741.8$Hz, $v = 84.46\text{m/s} = 164.18\text{knots}$, $d=40.43$m, and $t_0 = 3.29$s. However, there are major assumptions with using this equation in case, as it is derived for a straight line trajectory of the source at constant speed, both of which will strictly not hold during the takeoff situation, and are only good to a basic approximation. However, the velocity deduced is still within 10\% of the maximum takeoff velocity of 150 knots for a Learjet.
 
 \begin{figure}[ht]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem10_jet_spectrogram_doppler_shift_tracking.pdf}
-        \caption{High Dur}
+        \caption{Spectrogram of observed jet takeoff sound}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{problem10_f_app_best_fit_estimate.pdf}
-        \caption{Low Dur}
+        \caption{Best-fit of the most significant "chirp"}
     \end{subfigure}
-    \caption{Doppler Shift Tracking and Estimate\vspace{-0.5cm}}
+    \caption{Doppler shift tracking and an estimate of $f_\text{app}(t)$\vspace{-0.5cm}}
     \label{doppler_shift_chirp}
 \end{figure}
 
 \section{Generating Random Noise}
-Done. White: ; Pink: Low-frequency filtering of a white noise signal; Brown: Integration of a white noise signal. Give the procedure followed in code.
+Color noise was generted by using the power law $$. In the time domain, White: ; Pink: Low-frequency filtering of a white noise signal; Brown: Integration of a white noise signal. Give the procedure followed in code. Time bandwidth. Bandwidth more limited, time
 
 \begin{figure}[ht]
     \centering
     \begin{subfigure}[b]{0.31\textwidth}
         \includegraphics[width=\textwidth]{problem11_white_noise_time.pdf}
-        \caption{High Dur}
+        \caption{White noise}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.31\textwidth}
         \includegraphics[width=\textwidth]{problem11_pink_noise_time.pdf}
-        \caption{Low Dur}
+        \caption{Pink noise}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.31\textwidth}
         \includegraphics[width=\textwidth]{problem11_brown_noise_time.pdf}
-        \caption{Low Dur}
+        \caption{Brown noise}
     \end{subfigure}
-    \caption{Color Noise in Time Domain\vspace{-0.5cm}}
+    \caption{Color noise in time domain\vspace{-0.5cm}}
     \label{color_noise_time_domain}
 \end{figure}
 
@@ -236,34 +231,29 @@ Done. White: ; Pink: Low-frequency filtering of a white noise signal; Brown: Int
     \centering
     \begin{subfigure}[b]{0.31\textwidth}
         \includegraphics[width=\textwidth]{problem11_white_noise_power_spectrum_db.pdf}
-        \caption{High Dur}
+        \caption{White noise, constant slope}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.31\textwidth}
         \includegraphics[width=\textwidth]{problem11_pink_noise_power_spectrum_db.pdf}
-        \caption{Low Dur}
+        \caption{Pink noise, slope $-10$dB/dec}
     \end{subfigure}
     \quad
     \begin{subfigure}[b]{0.31\textwidth}
         \includegraphics[width=\textwidth]{problem11_brown_noise_power_spectrum_db.pdf}
-        \caption{Low Dur}
+        \caption{Brown noise, slope $-20$dB/dec}
     \end{subfigure}
-    \caption{Power Spectrum of Color Noise\vspace{-0.5cm}}
+    \caption{Power spectrum of color noise\vspace{-0.5cm}}
     \label{color_noise_freq_domain}
 \end{figure}
 
 \section{Simpler Generation of Uniform Random (White) Noise}
-Done. For $U \sim \mathcal{U}(0,1)$ and $W$ to be uncorrelated uniform white noise signal in the PCM encoding, i.e. $W \in [-1,1]$, we can use the simple transform:
-\[
-    W = 2 U - 1
-\]
-
-Can be verified in the frequency domain. Time domain sequence given in \ref{uniform_white_noise}.
+Given $U \sim \mathcal{U}(0,1)$, we can create uncorrelated uniform white noise with PCM encoding, i.e. $W \in [-1,1]$, by the transformation $W = 2 U - 1$. A realization of the random process $W[n]$ is given in figure \ref{uniform_white_noise}.
 
 \begin{figure}[ht]
     \centering
     \includegraphics[width=0.5\textwidth]{problem12_uniform_white_noise_sequence.pdf}
-    \caption{Uniform White Noise Sequence\vspace{-0.5cm}}
+    \caption{Uniform white noise sequence\vspace{-0.5cm}}
     \label{uniform_white_noise}
 \end{figure}
 
@@ -271,7 +261,7 @@ Can be verified in the frequency domain. Time domain sequence given in \ref{unif
 \clearpage
 \section*{Appendix}
 
-MATLAB code for prob 4, dialtone decode algorithm, goes here.
+\textsc{MATLAB} code for algorithm \ref{alg:dtmf_decode_algorithm} is as follows.
 
 \begin{lstlisting}
 % simple dtmf decode algorithm for a subset of tones (can be extended)
